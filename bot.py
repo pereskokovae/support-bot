@@ -10,6 +10,8 @@ from google.cloud import api_keys_v2, dialogflow
 
 from dotenv import load_dotenv
 
+from create_intent import create_intent
+
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
@@ -82,4 +84,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    load_dotenv()
+    project_id = os.getenv('PROJECT_ID')
+    create_intent(project_id)

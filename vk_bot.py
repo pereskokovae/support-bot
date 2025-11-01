@@ -3,13 +3,22 @@ import random
 
 import vk_api as vk
 from vk_api.longpoll import VkLongPoll, VkEventType
+
+from helper_dialogflow import detect_intent_texts
+
 from dotenv import load_dotenv
 
 
 def echo(event, vk_api):
+    dialogflow_response = detect_intent_texts(
+        project_id=os.getenv('PROJECT_ID'),
+        session_id=event.user_id,
+        user_message=event.text,
+        language_code='ru'
+        )
     vk_api.messages.send(
         user_id=event.user_id,
-        message=event.text,
+        message=dialogflow_response,
         random_id=random.randint(1,1000)
     )
 

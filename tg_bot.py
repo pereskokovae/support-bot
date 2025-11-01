@@ -6,11 +6,12 @@ from telegram.ext import (
     Updater, CommandHandler, MessageHandler, Filters, CallbackContext
     )
 
-from google.cloud import api_keys_v2, dialogflow
+from google.cloud import api_keys_v2
 
 from dotenv import load_dotenv
 
-from create_intent import create_intent
+from helper_dialogflow import detect_intent_texts
+
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -50,22 +51,6 @@ def echo_dialogflow(update: Update, context: CallbackContext):
     update.message.reply_text(text=dialogflow_response)
 
 
-def detect_intent_texts(project_id, session_id, user_message, language_code):
-    session_client = dialogflow.SessionsClient()
-    session = session_client.session_path(project_id, session_id)
-
-    text_input = dialogflow.TextInput(
-        text=user_message,
-        language_code=language_code
-        )
-    query_input = dialogflow.QueryInput(text=text_input)
-
-    response = session_client.detect_intent(
-        request={"session": session, "query_input": query_input}
-    )
-    return response.query_result.fulfillment_text
-
-
 def main():
     load_dotenv()
     api_key = os.environ['API_KEY_TG_BOT']
@@ -84,6 +69,4 @@ def main():
 
 
 if __name__ == '__main__':
-    load_dotenv()
-    project_id = os.getenv('PROJECT_ID')
-    create_intent(project_id)
+    main()

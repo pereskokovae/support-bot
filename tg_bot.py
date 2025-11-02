@@ -48,7 +48,8 @@ def echo_dialogflow(update: Update, context: CallbackContext):
         user_message=update.message.text,
         language_code='ru'
         )
-    update.message.reply_text(text=dialogflow_response)
+    text = dialogflow_response.query_result.fulfillment_text
+    update.message.reply_text(text=text)
 
 
 def main():

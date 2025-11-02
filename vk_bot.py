@@ -16,11 +16,14 @@ def echo(event, vk_api):
         user_message=event.text,
         language_code='ru'
         )
-    vk_api.messages.send(
-        user_id=event.user_id,
-        message=dialogflow_response,
-        random_id=random.randint(1,1000)
-    )
+    is_response_fallback = dialogflow_response.query_result.intent.is_fallback
+    if not is_response_fallback:
+        text = dialogflow_response.query_result.fulfillment_text
+        vk_api.messages.send(
+            user_id=event.user_id,
+            message=text,
+            random_id=random.randint(1, 1000)
+        )
 
 
 if __name__ == "__main__":

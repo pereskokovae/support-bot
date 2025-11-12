@@ -3,10 +3,11 @@ import logging
 
 from telegram import Update
 from telegram.ext import (
-    Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+    Updater, MessageHandler, Filters, CallbackContext
     )
 
 from google.cloud import api_keys_v2
+from functools import partial
 
 from dotenv import load_dotenv
 
@@ -41,13 +42,13 @@ def start(update: Update, context: CallbackContext):
         )
 
 
-def echo_dialogflow(update: Update, context: CallbackContext):
+def echo_dialogflow(update: Update, context: CallbackContext, project_id):
     dialogflow_response = detect_intent_texts(
-        project_id=os.getenv('PROJECT_ID'),
+        project_id=project_id,
         session_id=update.effective_chat.id,
         user_message=update.message.text,
         language_code='ru'
-        )
+    )
     text = dialogflow_response.query_result.fulfillment_text
     update.message.reply_text(text=text)
 
@@ -55,15 +56,18 @@ def echo_dialogflow(update: Update, context: CallbackContext):
 def main():
     load_dotenv()
     api_key = os.environ['API_KEY_TG_BOT']
-
+    project_id = os.environ['PROJECT_ID']
     updater = Updater(api_key, use_context=True)
 
     dispatcher = updater.dispatcher
 
-    dispatcher.add_handler(CommandHandler("start", start))
+    echo_handler = partial(echo_dialogflow, project_id=project_id)
     dispatcher.add_handler(MessageHandler(
-        Filters.text & ~Filters.command, echo_dialogflow
-        ))
+        Filters.text & ~Filters.command, echo_handler
+    ))
+
+    updater.start_polling()
+    updater.idle()
 
     updater.start_polling()
     updater.idle()

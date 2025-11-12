@@ -1,6 +1,8 @@
 import json
 import os
+
 from google.cloud import dialogflow
+from dotenv import load_dotenv
 
 BASE_DIR = os.path.dirname(__file__)
 
@@ -9,16 +11,15 @@ def get_intents():
     path_to_intents = os.path.join(BASE_DIR, 'questions.json')
     with open(path_to_intents, 'r', encoding='utf-8') as file:
         file_content = file.read()
-    return json.loads(file_content)
+    return json.loads(file_content).items()
 
 
-def create_intent(project_id):
+def create_intent(project_id, intents_items):
     intents_client = dialogflow.IntentsClient()
     parent = dialogflow.AgentsClient.agent_path(project_id)
+    responses = []
 
-    intents_json = get_intents()
-
-    for display_name, items in intents_json.items():
+    for display_name, items in intents_items:
         training_phrases_parts = items.get('questions', [])
         message_texts = [items.get('answer', '')]
 
@@ -42,8 +43,9 @@ def create_intent(project_id):
         response = intents_client.create_intent(
             request={"parent": parent, "intent": intent}
         )
+        responses.append(response)
 
-        print("Intent created: {}".format(response))
+    return responses
 
 
 def detect_intent_texts(project_id, session_id, user_message, language_code):
@@ -60,3 +62,13 @@ def detect_intent_texts(project_id, session_id, user_message, language_code):
         request={"session": session, "query_input": query_input}
     )
     return response
+
+
+if __name__ == "__main__":
+    load_dotenv()
+    project_id = os.environ['PROJECT_ID']
+    intents_items = get_intents()
+
+    responses = create_intent(project_id, intents_items)
+    if responses:
+        print(f"Intent created: {responses}")

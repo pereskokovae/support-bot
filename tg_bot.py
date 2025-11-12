@@ -43,18 +43,23 @@ def start(update: Update, context: CallbackContext):
 
 
 def handle_tg_message(update: Update, context: CallbackContext, project_id):
-    tg_session_id = f"tg_{update.effective_chat.id}"
-    dialogflow_response = detect_intent_texts(
-        project_id=project_id,
-        session_id=tg_session_id,
-        user_message=update.message.text,
-        language_code='ru'
-    )
-    text = dialogflow_response.query_result.fulfillment_text
-    update.message.reply_text(text=text)
+    try:
+        tg_session_id = f"tg_{update.effective_chat.id}"
+        dialogflow_response = detect_intent_texts(
+            project_id=project_id,
+            session_id=tg_session_id,
+            user_message=update.message.text,
+            language_code='ru'
+        )
+        text = dialogflow_response.query_result.fulfillment_text
+        update.message.reply_text(text=text)
+        logger.info(f'send response {text}')
+    except Exception as e:
+        logger.error(f'error while processing message:{e}')
 
 
 def main():
+    logger.info('Program started')
     load_dotenv()
     api_key = os.environ['API_KEY_TG_BOT']
     project_id = os.environ['PROJECT_ID']
@@ -66,9 +71,6 @@ def main():
     dispatcher.add_handler(MessageHandler(
         Filters.text & ~Filters.command, echo_handler
     ))
-
-    updater.start_polling()
-    updater.idle()
 
     updater.start_polling()
     updater.idle()

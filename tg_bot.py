@@ -42,10 +42,11 @@ def start(update: Update, context: CallbackContext):
         )
 
 
-def echo_dialogflow(update: Update, context: CallbackContext, project_id):
+def handle_tg_message(update: Update, context: CallbackContext, project_id):
+    tg_session_id = f"tg_{update.effective_chat.id}"
     dialogflow_response = detect_intent_texts(
         project_id=project_id,
-        session_id=update.effective_chat.id,
+        session_id=tg_session_id,
         user_message=update.message.text,
         language_code='ru'
     )
@@ -61,7 +62,7 @@ def main():
 
     dispatcher = updater.dispatcher
 
-    echo_handler = partial(echo_dialogflow, project_id=project_id)
+    echo_handler = partial(handle_tg_message, project_id=project_id)
     dispatcher.add_handler(MessageHandler(
         Filters.text & ~Filters.command, echo_handler
     ))

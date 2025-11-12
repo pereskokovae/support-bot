@@ -9,10 +9,11 @@ from helper_dialogflow import detect_intent_texts
 from dotenv import load_dotenv
 
 
-def echo(event, vk_api, project_id):
+def handle_vk_message(event, vk_api, project_id):
+    vk_session_id = f"vk_{event.user_id}"
     dialogflow_response = detect_intent_texts(
         project_id=project_id,
-        session_id=event.user_id,
+        session_id=vk_session_id,
         user_message=event.text,
         language_code='ru'
         )
@@ -29,10 +30,10 @@ def echo(event, vk_api, project_id):
 if __name__ == "__main__":
     load_dotenv()
     api_key = os.environ['API_KEY_VK_BOT']
-    project_id = os.getenv('PROJECT_ID')
+    project_id = os.environ['PROJECT_ID']
     vk_session = vk.VkApi(token=api_key)
     vk_api = vk_session.get_api()
     longpoll = VkLongPoll(vk_session)
     for event in longpoll.listen():
         if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-            echo(event, vk_api, project_id)
+            handle_vk_message(event, vk_api, project_id)

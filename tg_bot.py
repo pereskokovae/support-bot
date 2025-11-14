@@ -14,10 +14,6 @@ from dotenv import load_dotenv
 from helper_dialogflow import detect_intent_texts
 
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
 logger = logging.getLogger(__name__)
 
 
@@ -59,8 +55,12 @@ def handle_tg_message(update: Update, context: CallbackContext, project_id):
 
 
 def main():
-    logger.info('Program started')
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.INFO
+    )
     load_dotenv()
+
     api_key = os.environ['API_KEY_TG_BOT']
     project_id = os.environ['PROJECT_ID']
     updater = Updater(api_key, use_context=True)
